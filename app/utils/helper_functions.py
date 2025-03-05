@@ -1,5 +1,6 @@
 # helper functions for chunking LLM text
 
+# chunk the input text for embedding
 def chunk_text(text, chunk_size=200):
     # split the text by sentences to avoid breaking in the middle of a sentence
     sentences = text.split('. ')

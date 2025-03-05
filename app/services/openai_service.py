@@ -10,7 +10,7 @@ load_dotenv()
 OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
 OPENAI_EMBEDDING_MODEL = 'text-embedding-ada-002'
 
-# get the embedded vector for chunk
+# get the embedded vector for given input chunk
 def get_embedding(chunk):
     url = 'https://api.openai.com/v1/embeddings'
     headers = {

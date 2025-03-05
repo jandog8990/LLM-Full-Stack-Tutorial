@@ -10,5 +10,27 @@ load_dotenv()
 
 api_key = os.environ["PINE_CONE_API_KEY"]
 pc = Pinecone(api_key=api_key)
+EMBEDDING_DIM = 1536
 
+# embed text chunks and upload to PC vectorDB
+def embed_chunks_and_upload_to_pinecone(chunks, index_name):
+    # del index if it exists
+    if index_name in pinecone.list_indexes():
+        pc.delete_index(name=index_name)
+
+    # create new index in PineCone for embedded data
+    pc.create_index(name=index_name,
+        dimension=EMBEDDING_DIM,
+        metric="cosine")
+    index = pc.Index(index_name)
+
+    # embed each chunk and aggregate embeddings
+    embeddings_with_ids = []
+    for i, chunk in enumerate(chunks):
+        embedding = get_embedding(chunk)
+        embeddings_with_ids.append((str(i), embedding, chunk))
+
+    # upload the embeddings and texts for each chunk
+    upserts = [(id, vec, {"chunk_text": text}) for id, vec, text in embeddings_with_ids]
+    index.upsert(vectors=upserts)
 

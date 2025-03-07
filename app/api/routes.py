@@ -13,8 +13,11 @@ def embed_and_store():
     # handles scraping the URL, embedding the texts,
     # and uploading to the vector database.
     url = request.json['url']
+    print("Embed and store:")
+    print("url = " + url + "\n")
     url_text = scraping_service.scrape_website(url)
     chunks = chunk_text(url_text)
+    print("chunks = " + str(chunks))
     pinecone_service.embed_chunks_and_upload_to_pinecone(chunks, PC_INDEX_NAME)
     response_json = {
         "message": "Chunks embedded and stored successfully"

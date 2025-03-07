@@ -1,6 +1,6 @@
 # pinecone service for storing embedded text
 
-import pinecone
+from pinecone import Pinecone, ServerlessSpec
 from app.services.openai_service import get_embedding
 import os
 from dotenv import load_dotenv
@@ -15,13 +15,17 @@ EMBEDDING_DIM = 1536
 # embed text chunks and upload to PC vectorDB
 def embed_chunks_and_upload_to_pinecone(chunks, index_name):
     # del index if it exists
-    if index_name in pinecone.list_indexes():
+    if index_name in pc.list_indexes():
         pc.delete_index(name=index_name)
 
     # create new index in PineCone for embedded data
     pc.create_index(name=index_name,
         dimension=EMBEDDING_DIM,
-        metric="cosine")
+        metric="cosine",
+        spec=ServerlessSpec(
+            cloud="aws",
+            region="us-west-2"
+        ))
     index = pc.Index(index_name)
 
     # embed each chunk and aggregate embeddings
@@ -38,6 +42,6 @@ def embed_chunks_and_upload_to_pinecone(chunks, index_name):
 def get_most_similar_chunks_for_query(query, index_name):
     question_embedding = get_embedding(query)
     index = pc.Index(index_name)
-    query_results = index.query(question_embedding, top_k=3, include_metadata=True)
+    query_results = index.query(vector=question_embedding, top_k=3, include_metadata=True)
     context_chunks = [x['metadata']['chunk_text'] for x in query_results['matches']]
     return context_chunks
